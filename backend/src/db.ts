@@ -1,5 +1,5 @@
 
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, } from 'mongodb';
 import { loadEnvFile } from 'process';
 
 
@@ -20,17 +20,34 @@ const client = new MongoClient(uri, {
     }
 });
 
-async function run() {
-    try {
-        // Connect the client to the server	(optional starting in v4.7)
-        await client.connect();
-        // Send a ping to confirm a successful connection
-        await client.db("admin").command({ ping: 1 });
-        console.log("Pinged your deployment. You successfully connected to MongoDB!");
-    } finally {
-        // Ensures that the client will close when you finish/error
-        await client.close();
-    }
-}
 
-export default run;
+const fetchVideoList = async (params: { page?: number, limit?: number } = {}) => {
+    try {
+        const skip = ((params.page || 1) - 1) * (params.limit || 10);
+        await client.connect();
+        const db = client.db('client');
+        const videos = db.collection('videos');
+        return await videos.find({}).project({ title: 1 }).sort({ _id: 1 }).skip(skip).limit(params.limit || 10).toArray();
+    } catch (err) {
+        console.log(err);
+    } finally {
+        client.close();
+    }
+};
+
+const addVideoToCollection = async (doc: any) => {
+    try {
+        await client.connect()
+        const db = client.db('client');
+        const videos = db.collection('videos');
+        await videos.insertOne(doc);
+    } catch (err) {
+        console.log(err);
+    } finally {
+        client.close();
+    }
+
+};
+
+export { addVideoToCollection, fetchVideoList };
+
