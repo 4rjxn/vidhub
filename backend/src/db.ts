@@ -1,6 +1,7 @@
 
 import { MongoClient, ServerApiVersion, } from 'mongodb';
 import { loadEnvFile } from 'process';
+import { logger } from './utils/logger.js';
 
 
 try {
@@ -29,7 +30,7 @@ const fetchVideoList = async (params: { page?: number, limit?: number } = {}) =>
         const videos = db.collection('videos');
         return await videos.find({}).project({ title: 1 }).sort({ _id: 1 }).skip(skip).limit(params.limit || 10).toArray();
     } catch (err) {
-        console.log(err);
+        logger.error(`${err}`);
     } finally {
         client.close();
     }
@@ -42,7 +43,7 @@ const addVideoToCollection = async (doc: any) => {
         const videos = db.collection('videos');
         await videos.insertOne(doc);
     } catch (err) {
-        console.log(err);
+        logger.error(`${err}`);
     } finally {
         client.close();
     }
