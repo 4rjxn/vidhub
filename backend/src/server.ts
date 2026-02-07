@@ -1,15 +1,20 @@
 import express from "express";
 import extractJson from "./yt.js";
+import run from "./db.js";
 
 const PORT = 3939;
 const app = express();
 
+run().catch(console.dir);
 
 app.get("/addURL", async (req, res) => {
     const url: string = req.query.url as string;
     console.log(url);
-    let jsonData = await extractJson(url);
-    console.log(jsonData.title);
+    try {
+        let jsonData = await extractJson(url);
+    } catch (err) {
+        res.send(500);
+    }
 
 });
 
